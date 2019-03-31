@@ -1,10 +1,12 @@
 package com.mohammadsamandari.whatistheweather;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -16,9 +18,11 @@ import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -150,8 +154,22 @@ public class MainActivity extends AppCompatActivity {
 
         EditText edtCity = findViewById(R.id.edtCityName);
 
-        GetWeatherTask getWeatherTask = new GetWeatherTask();
-        getWeatherTask.execute(edtCity.getText().toString());
+        //  To Close The Keyboard as soon as button is clicked.
+        InputMethodManager mgr= (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        mgr.hideSoftInputFromWindow(edtCity.getWindowToken(),0);
+
+        //  To Encode the text of Edit Text So that cities with space are converted to url type and
+        //  no error happens:
+        try {
+            String encodedCityName= URLEncoder.encode(edtCity.getText().toString(),"UTF-8");
+            GetWeatherTask getWeatherTask = new GetWeatherTask();
+            getWeatherTask.execute(encodedCityName);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.i("Lord", String.valueOf(e));
+            updateUiWithError(String.valueOf(e));
+        }
+
     }
 
     @Override
